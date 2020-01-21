@@ -14,14 +14,14 @@
 #### opthons 参数说明  
 |||
 |:----|:----|
-|`connect=direct|replicaset`|**direct**: 直接建立一个到服务器的连接。如果指定了多个host，将按先后顺序挨个尝试建立连接，直到连接建立成功为止。如果只指定了一个host，则 direct 为默认值。<br>***replicaset***: 使用creplica set semantics建立连接（即使只提供了一个host）。指定的host作为种子列表来查找完整的replica set。当指定多个host时 replicaset 为默认值。|
-|`replicaset=name`| 驱动验证建立连接的replica set的名字。应用于 connect=replicaset。|
-|`slaveok=true|false` | **true**: 对于 connect=direct 模式，驱动对列表中的第一个服务器建立连接，即使它不是主服务器。对 connect=replicaset 模式，驱动将所有写操作发送到主节点，将所有读操作按round robin顺序分发到从节点。<br>**false**: 对 connect=direct 模式，驱动按顺序尝试所有host直到找到主节点。对 connect=replicaset 模式，驱动将只连接到主节点，并将所有读操作和写操作都发送到主节点。|
-|`safe=true|false`|**true**: 驱动在每次更新操作后都发送 getlasterror 命令以确保更新成功（参考 w 和 wtimeout）。<br>**false**: 驱动每次更新操作后不发送 getlasterror 命令。
+|connect=direct&#124;replicaset|**direct**: 直接建立一个到服务器的连接。如果指定了多个host，将按先后顺序挨个尝试建立连接，直到连接建立成功为止。如果只指定了一个host，则 direct 为默认值。<br>***replicaset***: 使用creplica set semantics建立连接（即使只提供了一个host）。指定的host作为种子列表来查找完整的replica set。当指定多个host时 replicaset 为默认值。|
+|replicaset=name| 驱动验证建立连接的replica set的名字。应用于 connect=replicaset。|
+|slaveok=true&#124;false | **true**: 对于 connect=direct 模式，驱动对列表中的第一个服务器建立连接，即使它不是主服务器。对 connect=replicaset 模式，驱动将所有写操作发送到主节点，将所有读操作按round robin顺序分发到从节点。<br>**false**: 对 connect=direct 模式，驱动按顺序尝试所有host直到找到主节点。对 connect=replicaset 模式，驱动将只连接到主节点，并将所有读操作和写操作都发送到主节点。|
+|safe=true&#124;false|**true**: 驱动在每次更新操作后都发送 getlasterror 命令以确保更新成功（参考 w 和 wtimeout）。<br>**false**: 驱动每次更新操作后不发送 getlasterror 命令。
 |w=n|w：代表server的数量<br>w=-1 不等待，不做异常检查<br>w=0 不等待，只返回网络错误<br>w=1 检查本机，并检查网络错误<br>w>1 检查w个server，并返回网络错,应用于safe=true|
 |wtimeoutMS=ms|写操作超时的时间，应用于 safe=true.|
-|`fsync=true|false`|是不是等待刷新数据到磁盘，应用于safe=true|
-|`journal=true|false`|是不是等待提交的数据已经写入到日志，并刷新到磁盘，应用于safe=true|
+|fsync=true&#124;false|是不是等待刷新数据到磁盘，应用于safe=true|
+|journal=true&#124;false|是不是等待提交的数据已经写入到日志，并刷新到磁盘，应用于safe=true|
 |maxPoolSize=n<br>minPoolSize=n|一些驱动会把没用的连接关闭。 然而,如果连接数低于minPoolSize值之下， 它们不会关闭空闲的连接。注意：连接会按照需要进行创建，因此当连接池被许多连接预填充的时候，minPoolSize不会生效。|
 |waitQueueTimeoutMS=ms|在超时之前，线程等待连接生效的总时间。如果连接池到达最大并且所有的连接都在使用，这个参数就生效了。|
 |waitQueueMultiple=n|驱动强行限制线程同时等待连接的个数。 这个限制了连接池的倍数。|
