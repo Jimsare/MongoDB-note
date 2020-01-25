@@ -509,3 +509,114 @@ secondaryIndexPrefetch: all
 
 #archiveMovedChunks: <boolean>
 ```
+
+## 数据库的相关操作
+1. 切换/创建数据库
+   > use dbname
+2. 查看当前所处的数据库
+   > db
+3. 在数据库中插入数据
+   > db.dbname.insert({……})
+4. 删除当前所处数据库
+   > db.dropDatabase()
+5. 查看当前db版本
+   > db.version()
+6. 查看当前db的连接机器地址
+   >db.getMongo()
+7. 从指定主机上克隆数据库
+   >db.cloneDatabase("127.0.0.1")
+8. 从指定的机器上复制指定的数据库到某个数据库
+   >db.copyDatabase("db1","db2","127.0.0.1")
+9. 数据库修复
+    >db.reqairDatabase()
+	>在MongoDB中频繁的进行数据增删改时，如果记录变了，例如数据大小发生了变化，这时候容易产生一些数据碎片，出现碎片引发的结果，
+	>一个是索引会出现性能问题，另外一个就是在一定的时间后，所占空间会莫明其妙地增大，所以要定期把数据库做修复，定期重新做索引，这样会提升MongoDB的稳定性和效率
+
+## 为数据库添加用户及设置密码
+  >db.createUser({user:'balabala',pwd:'******',rules:['options']})
+  rules参数详情  
+
+  |||
+  |:---|:---|
+  |**数据库用户角色(Database  User Roles)**|
+  |read|只读权限|
+  |readWrite |读写权限|
+  |**数据库管理角色(Database Administration Roles)**|
+  |dbAdmin|在当前数据库中执行管理操作|
+  |dbOwnder|在当前db中执行任意操作|
+  |userAdmin|在当前db中管理user|
+  |**备份和还原角色**|
+  |buckup|备份|
+  |restore|还原|
+  |**跨库角色(All-Database Roles)**|
+  |readAnyDatabase|在所有db上读取数据|
+  |readWriteAnyDatabase|在所有db上读写数据|
+  |userAdminAnyDatabase|在所有数据库上管理user|
+  |dbAdminAnyDatabase|管理所有数据库|
+  |**集群管理角色(Cluster Administration Roles)**|
+  |clusterAdmin|管理集群的最高权限|
+  |clusterManager|管理和监控集群的权限A user with this role can access the config and local databases, which are used in sharding and replication, respectively.|
+  |clusterMonitor|集群监控权限，对监控工具有readonly的权限|
+  |hostManager|管理Server|
+
+
+### 数据库登录
+> mongo -umiaobt -p --authenticationDatabase
+> mongo -umiaobt -p331sharp --authenticationDatabase
+
+## 数据库中collection相关操作
+1. 创建集合
+   > db.createCollection(name,option)  
+   >option为可选项，可以为对象  
+	在使用db.collectionname.insert()插入数据时，可以自动创建集合
+	option参数
+
+	|字段名|类型|描述|
+	|:----|:----:|:----|
+	| capped|布尔|（可选）如果为 true，则创建固定集合。固定集合是指有着固定大小的集合，当达到最大值时，它会自动覆盖最早的文档。当该值为 true 时，必须指定 size 参数。|
+	| autoIndexld|布尔|（即将弃用）如为 true，自动在 _id 字段创建索引。默认为 false。|
+	| size|number|（可选）为固定集合指定一个最大值（以字节计）。如果 capped 为 true，也需要指定该字段。|
+	| max|number|（可选）指定固定集合中包含文档的最大数量。|
+
+	在插入文档时，MongoDB 首先检查固定集合的 size 字段，然后检查 max 字段。
+2. 删除集合
+   >db.collectionname.drop()
+3. 更新集合
+   >db.cname.update()
+   >>添加字段：db.cname.update(
+	   {},
+	   {$set:{……}}，
+	   {},
+   )
+   >>删除字段db.cname.update(
+	   {},
+	   {$unset:{……}}，
+	   {},
+4. 固定集合
+   > 固定集合是固定大小的集合支持基于文档插入顺序的高吞吐率的插入、检索、删除操作。限制收集工作在某种程度上类似于循环缓冲区：一旦一个文档填满分配给它的空间，他将通过在限制集中重写老文档来给新文档让出空间。 固定集合能够保留插入顺序。因此，查询并不需要索引来保证以插入顺序来返回文档。减少了索引的消耗， 固定集合可以支持更高的插入吞吐。 为了为新文档腾出空间，在不需要脚本或显式删除操作的前提下，固定集合自动删除集合中最旧的文档。 固定集合有一个 _id 字段并且默认在 _id 字段上创建索引。 注意事项： 如果一个更新或替换操作改变了文档大小，操作将会失败 不能从固定集合中进行删除文档，可以使用drop() 方法来删除集合然后重新创建限制集。 固定集合不支持分片
+5. 检查一个集合是否为固定集合
+   > db.collectionname.isCapped()
+6. 使用命令convertToCapped转换一个非限制集合为一个限制集合
+   > db.runCommand({"convertToCapped":"collectionname",size:10000})
+## 集合中文档的增删改
+1. 插入数据
+   >db.cname.insert({……})或者db.cname.save()
+   >> save()方法接收一个指定文档的_id，如果没有那么久和insert()使用功能一样
+2. 更新数据
+   >db.cname.update({query},{upate{upsert:boolean,multi:boolean,writeContent:document}})
+   >>说明  
+
+   |||
+   |:----|:----|
+   | query | update的查询条件，类似sql update查询内where后面的|
+   | update | update的对象和一些更新的操作符（如$,$inc...）等，也可以理解为sql update查询内set后面的|
+   | upsert | 可选，这个参数的意思是，如果不存在update的记录，是否插入objNew,true为插入，默认是false，不插入。|
+   | multi |可选，mongodb 默认是false,只更新找到的第一条记录，如果这个参数为true,就把按条件查出来多条记录全部更新。|
+   | wirteContent |可选，抛出异常的级别。|
+   > save()语法  
+   db.cname.save()方法利用传入该方法的文档来替换已有文档（通俗解释：如果save方法传入的文档结构A与原文档结构B不一致时，则会使用新的文档结构A替换原来的文档结构B）。如果没有指定文档的 _id，那么 save() 就和 insert() 完全一样了。如果指定了文档的 _id，那么它会覆盖掉含有 save() 方法中指定的 _id的文档的全部数据  
+   db.cname.save(document,{wirteContent:doucment})  
+   db.users.save({"_id" : ObjectId("582194dd7f953cec73197bb1"),'status':"OK"})
+
+3. 删除数据
+   >db.cname.remove({query},{justOne:boolean,writeContent:document})
